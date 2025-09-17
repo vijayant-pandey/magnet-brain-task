@@ -7,41 +7,7 @@ import User from "../models/User.js";
  * Protected route (requires JWT)
  * Body: { title, description, dueDate, priority, assignedTo (optional userId) }
  */
-// export const createTask = async (req, res) => {
-//   try {
-//     const { title, description, dueDate, priority, assignedTo } = req.body;
 
-//     if (!title || !dueDate) {
-//       return res.status(400).json({ message: "title and dueDate are required" });
-//     }
-
-//     // If assignedTo not provided, assign to the requester
-//     let assignee = assignedTo || req.user._id;
-
-//     // If assignedTo provided, check that user exists
-//     if (assignedTo) {
-//       const userExists = await User.findById(assignedTo);
-//       if (!userExists) return res.status(400).json({ message: "Assigned user not found" });
-//     }
-
-//     const task = await Task.create({
-//       title,
-//       description,
-//       dueDate,
-//       priority: priority || "medium",
-//       assignedTo: assignee,
-//       createdBy: req.user._id
-//     });
-
-//     return res.status(201).json(task);
-//   } catch (err) {
-//     console.error("createTask error:", err);
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
-//  This is working fine, but i have to implement the RBAC so, new 
-
-// New create task for RBAC
 export const createTask = async (req, res) => {
   try {
     const { title, description, dueDate, status, priority, assignedTo, createdBy } = req.body;
@@ -89,65 +55,8 @@ export const createTask = async (req, res) => {
 
 
 // -----------------------------------------------------------------------------------------------
-// GET /api/tasks -- OLD
-// export const getTasks = async (req, res) => {
-//   try {
-//     const tasks = await Task.find({ user: req.user.id }); // fetch only logged-in user’s tasks
-//     res.json(tasks);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to fetch tasks", details: err.message });
-//   }
-// };
+// GET /api/tasks 
 
-// I get a prblem
-// In getTasks, we used:
-// const tasks = await Task.find({ user: req.user.id });
-// But in your Task schema, the field is actually: createdBy or assignedTo, not user. That means query always returns empty array.
-
-
-// GET /api/tasks --NEW
-// export const getTasks = async (req, res) => {
-//   try {
-//     const tasks = await Task.find({
-//       $or: [
-//         { createdBy: req.user.id },
-//         { assignedTo: req.user.id }
-//       ]
-//     });
-
-//     res.json(tasks);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to fetch tasks", details: err.message });
-//   }
-// };
-
-// THis is doing great, but i have to implement the Pagination of the Tasks so we have to make changes to the GET 
-
-// GET /api/tasks -- FOR PAGINATION 
-// export const getTasks = async (req, res) => {
-//   try {
-//     const page = parseInt(req.query.page) || 1;     // current page
-//     const limit = parseInt(req.query.limit) || 9;   // tasks per page
-//     const skip = (page - 1) * limit;
-
-//     const total = await Task.countDocuments({ createdBy: req.user.id });
-//     const tasks = await Task.find({ createdBy: req.user.id })
-//       .skip(skip)
-//       .limit(limit)
-//       .sort({ createdAt: -1 });
-
-//     res.json({
-//       tasks,
-//       total,
-//       page,
-//       pages: Math.ceil(total / limit)
-//     });
-//   } catch (err) {
-//     res.status(500).json({ message: "Error fetching tasks", error: err.message });
-//   }
-// };
-
-// THis is doing great, but i have to implement the RBAC Feature of the Tasks so we have to make changes to the GET 
 export const getTasks = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -190,17 +99,7 @@ export const getTasks = async (req, res) => {
 // -----------------------------------------------------------------------------------------------
 // EDIT AND UPDATE TASKS
 // GET /api/tasks/:id
-// export const getTaskById = async (req, res) => {
-//   try {
-//     const task = await Task.findById(req.params.id);
-//     if (!task) return res.status(404).json({ message: "Task not found" });
-//     return res.json(task);
-//   } catch (err) {
-//     console.error("getTaskById error:", err);
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
-// This is working fine, but now i have to create a dedicated page for every task so, we ahave to make changes to the view
+
 export const getTaskById = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
